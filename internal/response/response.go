@@ -5,35 +5,66 @@ import (
 	"net/http"
 )
 
-// TODO: Add http status code
 type Response interface {
+	Err() (err error)
 	JSON(w http.ResponseWriter) (err error)
 }
 
 type responseImpl struct {
-	Status  bool        `json:"status"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
+	err    error
+	Status string      `json:"status"`
+	Data   interface{} `json:"data"`
 }
 
-func Success(message string, data interface{}) (resp Response) {
+func Success(status string, data interface{}) (resp Response) {
 	return &responseImpl{
-		Status:  true,
-		Message: message,
-		Data:    data,
+		err:    nil,
+		Status: status,
+		Data:   data,
 	}
 }
 
-func Error(err error) (resp Response) {
+func Error(status string, err error) (resp Response) {
 	return &responseImpl{
-		Status:  false,
-		Message: err.Error(),
-		Data:    nil,
+		err:    err,
+		Status: status,
+		Data:   nil,
 	}
+}
+
+func (r *responseImpl) getStatusCode(status string) (statusCode int) {
+	switch status {
+	case StatusOK:
+		return http.StatusOK
+	case StatusCreated:
+		return http.StatusCreated
+	case StatusBadRequest:
+		return http.StatusBadRequest
+	case StatusUnauthorized:
+		return http.StatusUnauthorized
+	case StatusForbiddend:
+		return http.StatusForbidden
+	case StatusNotFound:
+		return http.StatusNotFound
+	case StatusConflicted:
+		return http.StatusConflict
+	case StatusUnprocessableEntity:
+		return http.StatusUnprocessableEntity
+	case StatusInternalServerError:
+		return http.StatusInternalServerError
+	default:
+		return http.StatusInternalServerError
+	}
+}
+
+func (r *responseImpl) Err() (err error) {
+	return r.err
 }
 
 func (r *responseImpl) JSON(w http.ResponseWriter) error {
+	statusCode := r.getStatusCode(r.Status)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
 
 	return json.NewEncoder(w).Encode(r)
 }

@@ -3,7 +3,6 @@ package account
 import (
 	"time"
 
-	"github.com/madeindra/devoria-workshop-to-challenge/internal/constant"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/response"
 	"golang.org/x/net/context"
 )
@@ -24,6 +23,8 @@ func NewAccountUsecase(repository AccountRepository) AccountUsecase {
 	}
 }
 
+// don't use response in usecase
+
 // Registration usecase
 func (uc *accountUsecaseImpl) Register(ctx context.Context, params AccountRegisterRequest) response.Response {
 	account := Account{
@@ -36,19 +37,19 @@ func (uc *accountUsecaseImpl) Register(ctx context.Context, params AccountRegist
 
 	ID, err := uc.repository.Create(ctx, account)
 	if err != nil {
-		return response.Error(err)
+		return response.Error(response.StatusInternalServerError, err)
 	}
 	account.ID = ID
 
-	return response.Success(constant.MessageRegisterSuccess, account)
+	return response.Success(response.StatusCreated, account)
 }
 
 // Login usecase
 func (uc *accountUsecaseImpl) Login(ctx context.Context, params AccountLoginRequest) response.Response {
-	return response.Success(constant.MessageLoginSuccess, ctx)
+	return response.Success(response.StatusOK, ctx)
 }
 
 // Get Account usecase
 func (uc *accountUsecaseImpl) GetAccount(ctx context.Context) response.Response {
-	return response.Success(constant.MessageGeneralSuccess, ctx)
+	return response.Success(response.StatusOK, ctx)
 }

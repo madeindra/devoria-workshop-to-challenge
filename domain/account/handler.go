@@ -24,6 +24,7 @@ func NewAccountHandler(router *mux.Router, validate *validator.Validate, usecase
 }
 
 func (handler *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
+	//TODO: add checking duplicate username / email
 	var res response.Response
 	var params AccountRegisterRequest
 
@@ -31,19 +32,20 @@ func (handler *AccountHandler) Register(w http.ResponseWriter, r *http.Request) 
 
 	err := json.NewDecoder(r.Body).Decode(&params)
 	if err != nil {
-		res = response.Error(err)
+		res = response.Error(response.StatusUnprocessableEntity, err)
 		res.JSON(w)
 		return
 	}
 
 	err = handler.Validate.StructCtx(ctx, params)
 	if err != nil {
-		res = response.Error(err)
+		res = response.Error(response.StatusBadRequest, err)
 		res.JSON(w)
 		return
 	}
 
 	res = handler.Usecase.Register(ctx, params)
+	// use multi return, return data
 	res.JSON(w)
 
 }
