@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/bcrypt"
+	"github.com/madeindra/devoria-workshop-to-challenge/internal/exception"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/response"
 	"golang.org/x/net/context"
 )
@@ -26,10 +27,17 @@ func NewAccountUsecase(repository AccountRepository, bcrypt bcrypt.Bcrypt) Accou
 	}
 }
 
-// don't use response in usecase
-
 // Registration usecase
 func (uc *accountUsecaseImpl) Register(ctx context.Context, params AccountRegisterRequest) response.Response {
+	_, err := uc.repository.FindByEmail(ctx, params.Email)
+	if err == nil {
+		return response.Error(response.StatusConflicted, exception.ErrConflicted)
+	}
+
+	if err != exception.ErrNotFound {
+		return response.Error(response.StatusInternalServerError, exception.ErrInternalServer)
+	}
+
 	hashedPassword, err := uc.bcrypt.HashPassword(params.Password)
 	if err != nil {
 		return response.Error(response.StatusInternalServerError, err)
@@ -47,9 +55,11 @@ func (uc *accountUsecaseImpl) Register(ctx context.Context, params AccountRegist
 	if err != nil {
 		return response.Error(response.StatusInternalServerError, err)
 	}
-	account.ID = ID
 
-	//TODO: Transform ressponse to hide paswd
+	// assign new ID & omit password
+	account.ID = ID
+	account.Password = nil
+
 	return response.Success(response.StatusCreated, account)
 }
 

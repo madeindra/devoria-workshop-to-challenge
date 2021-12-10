@@ -1,6 +1,9 @@
 package account
 
 import (
+	"errors"
+
+	"github.com/madeindra/devoria-workshop-to-challenge/internal/exception"
 	"golang.org/x/net/context"
 	"gorm.io/gorm"
 )
@@ -31,7 +34,15 @@ func (repo *accountRepositoryImpl) FindByID(ctx context.Context, ID int64) (Acco
 	account := Account{}
 	result := repo.db.First(&account, ID)
 
-	return account, result.Error
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return account, exception.ErrNotFound
+	}
+
+	if result.Error != nil {
+		return account, exception.ErrInternalServer
+	}
+
+	return account, nil
 }
 
 // Select Account by Email
@@ -39,7 +50,15 @@ func (repo *accountRepositoryImpl) FindByEmail(ctx context.Context, email string
 	account := Account{}
 	result := repo.db.Where(&Account{Email: email}).First(&account)
 
-	return account, result.Error
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return account, exception.ErrNotFound
+	}
+
+	if result.Error != nil {
+		return account, exception.ErrInternalServer
+	}
+
+	return account, nil
 }
 
 // Insert into Account
@@ -51,9 +70,14 @@ func (repo *accountRepositoryImpl) Create(ctx context.Context, account Account) 
 		LastName:  account.LastName,
 		CreatedAt: account.CreatedAt,
 	}
+
 	result := repo.db.Create(&newAccount)
 
-	return newAccount.ID, result.Error
+	if result.Error != nil {
+		return 0, exception.ErrInternalServer
+	}
+
+	return newAccount.ID, nil
 }
 
 // Update Account
@@ -62,5 +86,9 @@ func (repo *accountRepositoryImpl) Update(ctx context.Context, ID int64, account
 
 	result := repo.db.Model(&account).UpdateColumns(account).Find(&updatedAccount)
 
-	return updatedAccount, result.Error
+	if result.Error != nil {
+		return updatedAccount, exception.ErrInternalServer
+	}
+
+	return updatedAccount, nil
 }

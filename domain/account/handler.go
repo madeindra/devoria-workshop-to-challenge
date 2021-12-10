@@ -45,7 +45,6 @@ func (handler *AccountHandler) Register(w http.ResponseWriter, r *http.Request) 
 	}
 
 	res = handler.Usecase.Register(ctx, params)
-	// use multi return, return data
 	res.JSON(w)
 
 }
