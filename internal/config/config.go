@@ -18,12 +18,16 @@ type Config struct {
 		MaxOpenConnections int
 		MaxIdleConnections int
 	}
+	Bcrypt struct {
+		HashCost int
+	}
 }
 
 func New() *Config {
 	c := new(Config)
 	c.loadApp()
 	c.loadGorm()
+	c.loadBcrypt()
 
 	return c
 }
@@ -54,5 +58,14 @@ func (c *Config) loadGorm() *Config {
 	c.Gorm.MaxIdleConnections = int(maxIdleConnections)
 
 	c.Gorm.DB = postgres.Open(dsn)
+	return c
+}
+
+func (c *Config) loadBcrypt() *Config {
+	// env value
+	hashCost := os.Getenv("BCRYPT_HASH_COST")
+
+	c.Bcrypt.HashCost, _ = strconv.Atoi(hashCost)
+
 	return c
 }

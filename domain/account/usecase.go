@@ -3,6 +3,7 @@ package account
 import (
 	"time"
 
+	"github.com/madeindra/devoria-workshop-to-challenge/internal/bcrypt"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/response"
 	"golang.org/x/net/context"
 )
@@ -15,11 +16,13 @@ type AccountUsecase interface {
 
 type accountUsecaseImpl struct {
 	repository AccountRepository
+	bcrypt     bcrypt.Bcrypt
 }
 
-func NewAccountUsecase(repository AccountRepository) AccountUsecase {
+func NewAccountUsecase(repository AccountRepository, bcrypt bcrypt.Bcrypt) AccountUsecase {
 	return &accountUsecaseImpl{
 		repository: repository,
+		bcrypt:     bcrypt,
 	}
 }
 
@@ -27,9 +30,14 @@ func NewAccountUsecase(repository AccountRepository) AccountUsecase {
 
 // Registration usecase
 func (uc *accountUsecaseImpl) Register(ctx context.Context, params AccountRegisterRequest) response.Response {
+	hashedPassword, err := uc.bcrypt.HashPassword(params.Password)
+	if err != nil {
+		return response.Error(response.StatusInternalServerError, err)
+	}
+
 	account := Account{
 		Email:     params.Email,
-		Password:  &params.Password,
+		Password:  &hashedPassword,
 		FirstName: params.FirstName,
 		LastName:  params.LastName,
 		CreatedAt: time.Now(),
@@ -41,6 +49,7 @@ func (uc *accountUsecaseImpl) Register(ctx context.Context, params AccountRegist
 	}
 	account.ID = ID
 
+	//TODO: Transform ressponse to hide paswd
 	return response.Success(response.StatusCreated, account)
 }
 

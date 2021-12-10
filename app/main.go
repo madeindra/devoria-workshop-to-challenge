@@ -13,6 +13,7 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/madeindra/devoria-workshop-to-challenge/domain/account"
+	"github.com/madeindra/devoria-workshop-to-challenge/internal/bcrypt"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/config"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/constant"
 	"gorm.io/gorm"
@@ -39,10 +40,11 @@ func main() {
 	// dependencies init
 	validator := validator.New()
 	router := mux.NewRouter()
+	bcrypt := bcrypt.NewBcrypt(cfg.Bcrypt.HashCost)
 
 	// repo, usecase, hadnler init
 	accountRepo := account.NewAccountRepository(db, constant.TableAccount)
-	accountUsecase := account.NewAccountUsecase(accountRepo)
+	accountUsecase := account.NewAccountUsecase(accountRepo, bcrypt)
 	account.NewAccountHandler(router, validator, accountUsecase)
 
 	// server init
