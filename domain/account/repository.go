@@ -1,11 +1,12 @@
 package account
 
 import (
-	"errors"
+	"database/sql"
+	"fmt"
+	"log"
 
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/exception"
 	"golang.org/x/net/context"
-	"gorm.io/gorm"
 )
 
 type (
@@ -13,16 +14,16 @@ type (
 		FindByID(ctx context.Context, ID int64) (Account, error)
 		FindByEmail(ctx context.Context, email string) (Account, error)
 		Create(ctx context.Context, account Account) (int64, error)
-		Update(ctx context.Context, ID int64, account Account) (Account, error)
+		Update(ctx context.Context, ID int64, account Account) error
 	}
 
 	accountRepositoryImpl struct {
-		db        *gorm.DB
+		db        *sql.DB
 		tableName string
 	}
 )
 
-func NewAccountRepository(db *gorm.DB, tableName string) AccountRepository {
+func NewAccountRepository(db *sql.DB, tableName string) AccountRepository {
 	return &accountRepositoryImpl{
 		db:        db,
 		tableName: tableName,
@@ -32,14 +33,41 @@ func NewAccountRepository(db *gorm.DB, tableName string) AccountRepository {
 // Select Account by ID (PK)
 func (repo *accountRepositoryImpl) FindByID(ctx context.Context, ID int64) (Account, error) {
 	account := Account{}
-	result := repo.db.First(&account, ID)
 
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+	query := fmt.Sprintf(`SELECT id, email, password, firstName, lastName, createdAt, lastModifiedAt FROM %s WHERE id = ?`, repo.tableName)
+	stmt, err := repo.db.PrepareContext(ctx, query)
+	if err != nil {
+		log.Println(err)
+		return account, exception.ErrInternalServer
+	}
+	defer stmt.Close()
+
+	row := stmt.QueryRowContext(ctx, ID)
+
+	var password sql.NullString
+	var lastModifiedAt sql.NullTime
+
+	err = row.Scan(
+		&account.ID,
+		&account.Email,
+		&password,
+		&account.FirstName,
+		&account.LastName,
+		&account.CreatedAt,
+		&lastModifiedAt,
+	)
+
+	if err != nil {
+		log.Println(err)
 		return account, exception.ErrNotFound
 	}
 
-	if result.Error != nil {
-		return account, exception.ErrInternalServer
+	if password.Valid {
+		account.Password = &password.String
+	}
+
+	if lastModifiedAt.Valid {
+		account.LastModifiedAt = &lastModifiedAt.Time
 	}
 
 	return account, nil
@@ -48,14 +76,41 @@ func (repo *accountRepositoryImpl) FindByID(ctx context.Context, ID int64) (Acco
 // Select Account by Email
 func (repo *accountRepositoryImpl) FindByEmail(ctx context.Context, email string) (Account, error) {
 	account := Account{}
-	result := repo.db.Where(&Account{Email: email}).First(&account)
 
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+	query := fmt.Sprintf(`SELECT id, email, password, firstName, lastName, createdAt, lastModifiedAt FROM %s WHERE email = ?`, repo.tableName)
+	stmt, err := repo.db.PrepareContext(ctx, query)
+	if err != nil {
+		log.Println(err)
+		return account, exception.ErrInternalServer
+	}
+	defer stmt.Close()
+
+	row := stmt.QueryRowContext(ctx, email)
+
+	var password sql.NullString
+	var lastModifiedAt sql.NullTime
+
+	err = row.Scan(
+		&account.ID,
+		&account.Email,
+		&password,
+		&account.FirstName,
+		&account.LastName,
+		&account.CreatedAt,
+		&lastModifiedAt,
+	)
+
+	if err != nil {
+		log.Println(err)
 		return account, exception.ErrNotFound
 	}
 
-	if result.Error != nil {
-		return account, exception.ErrInternalServer
+	if password.Valid {
+		account.Password = &password.String
+	}
+
+	if lastModifiedAt.Valid {
+		account.LastModifiedAt = &lastModifiedAt.Time
 	}
 
 	return account, nil
@@ -63,32 +118,58 @@ func (repo *accountRepositoryImpl) FindByEmail(ctx context.Context, email string
 
 // Insert into Account
 func (repo *accountRepositoryImpl) Create(ctx context.Context, account Account) (int64, error) {
-	newAccount := Account{
-		Email:     account.Email,
-		Password:  account.Password,
-		FirstName: account.FirstName,
-		LastName:  account.LastName,
-		CreatedAt: account.CreatedAt,
+	command := fmt.Sprintf("INSERT INTO %s (email, password, firstName, lastName, createdAt) VALUES (?, ?, ?, ?, ?)", repo.tableName)
+	stmt, err := repo.db.PrepareContext(ctx, command)
+	if err != nil {
+		return 0, err
+	}
+	defer stmt.Close()
+
+	result, err := stmt.ExecContext(
+		ctx,
+		account.Email,
+		*account.Password,
+		account.FirstName,
+		account.LastName,
+		account.CreatedAt,
+	)
+
+	if err != nil {
+		return 0, err
 	}
 
-	result := repo.db.Create(&newAccount)
+	ID, _ := result.LastInsertId()
 
-	if result.Error != nil {
-		return 0, exception.ErrInternalServer
-	}
-
-	return newAccount.ID, nil
+	return ID, nil
 }
 
 // Update Account
-func (repo *accountRepositoryImpl) Update(ctx context.Context, ID int64, account Account) (Account, error) {
-	updatedAccount := Account{}
+func (repo *accountRepositoryImpl) Update(ctx context.Context, ID int64, account Account) error {
+	command := fmt.Sprintf(`UPDATE %s SET password = ?, firstName = ?, lastName = ?, lastModifiedAt = ? WHERE id = ?`, repo.tableName)
+	stmt, err := repo.db.PrepareContext(ctx, command)
+	if err != nil {
+		log.Println(err)
+		return exception.ErrInternalServer
+	}
+	defer stmt.Close()
 
-	result := repo.db.Model(&account).UpdateColumns(account).Find(&updatedAccount)
+	result, err := stmt.ExecContext(
+		ctx,
+		*account.Password,
+		account.FirstName,
+		account.LastName,
+		account.LastModifiedAt,
+	)
 
-	if result.Error != nil {
-		return updatedAccount, exception.ErrInternalServer
+	if err != nil {
+		log.Println(err)
+		return exception.ErrInternalServer
 	}
 
-	return updatedAccount, nil
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected < 1 {
+		return exception.ErrNotFound
+	}
+
+	return nil
 }

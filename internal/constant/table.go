@@ -1,5 +1,5 @@
 package constant
 
 const (
-	TableAccount = "account"
+	TableAccount = "accounts"
 )

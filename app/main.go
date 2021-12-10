@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,13 +11,13 @@ import (
 	"syscall"
 
 	"github.com/go-playground/validator/v10"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/madeindra/devoria-workshop-to-challenge/domain/account"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/bcrypt"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/config"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/constant"
-	"gorm.io/gorm"
 )
 
 func main() {
@@ -24,18 +25,16 @@ func main() {
 	cfg := config.New()
 
 	// gorm database init
-	db, err := gorm.Open(cfg.Gorm.DB)
+	db, err := sql.Open("mysql", cfg.Database.DSN)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	sqlDB, err := db.DB()
-	if err != nil {
+	if err := db.Ping(); err != nil {
 		log.Fatal(err)
 	}
 
-	sqlDB.SetMaxIdleConns(cfg.Gorm.MaxIdleConnections)
-	sqlDB.SetMaxOpenConns(cfg.Gorm.MaxOpenConnections)
+	db.SetMaxIdleConns(cfg.Database.MaxIdleConnections)
+	db.SetMaxOpenConns(cfg.Database.MaxOpenConnections)
 
 	// dependencies init
 	validator := validator.New()
@@ -66,5 +65,5 @@ func main() {
 
 	server.Shutdown(context.Background())
 
-	sqlDB.Close()
+	db.Close()
 }

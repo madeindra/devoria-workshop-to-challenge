@@ -2,19 +2,17 @@ package config
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"strconv"
-
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 type Config struct {
 	App struct {
 		Port string
 	}
-	Gorm struct {
-		DB                 gorm.Dialector
+	Database struct {
+		DSN                string
 		MaxOpenConnections int
 		MaxIdleConnections int
 	}
@@ -52,12 +50,18 @@ func (c *Config) loadGorm() *Config {
 	maxOpenConnections, _ := strconv.ParseInt(os.Getenv("DB_MAX_OPEN_CONNECTIONS"), 10, 64)
 	maxIdleConnections, _ := strconv.ParseInt(os.Getenv("DB_MAX_IDLE_CONNECTIONS"), 10, 64)
 
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s", host, port, username, password, database)
+	connVal := url.Values{}
+	connVal.Add("parseTime", "1")
+	connVal.Add("loc", "Asia/Jakarta")
 
-	c.Gorm.MaxOpenConnections = int(maxOpenConnections)
-	c.Gorm.MaxIdleConnections = int(maxIdleConnections)
+	dbConnectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", username, password, host, port, database)
+	dsn := fmt.Sprintf("%s?%s", dbConnectionString, connVal.Encode())
 
-	c.Gorm.DB = postgres.Open(dsn)
+	c.Database.DSN = dsn
+
+	c.Database.MaxOpenConnections = int(maxOpenConnections)
+	c.Database.MaxIdleConnections = int(maxIdleConnections)
+
 	return c
 }
 
