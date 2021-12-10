@@ -11,37 +11,43 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/madeindra/devoria-workshop-to-challenge/domain/account"
-	"gorm.io/driver/postgres"
+	"github.com/madeindra/devoria-workshop-to-challenge/internal/config"
+	"github.com/madeindra/devoria-workshop-to-challenge/internal/constant"
 	"gorm.io/gorm"
 )
 
 func main() {
 	// config init
-	//cfg := config.New()
+	cfg := config.New()
 
-	// gorm init
-	dsn := "host=localhost user=postgres password=password dbname=postgres port=5432 sslmode=disable"
-	db, _ := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	// gorm database init
+	db, err := gorm.Open(cfg.Gorm.DB)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	sqlDB, _ := db.DB()
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(100)
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// validator init
+	sqlDB.SetMaxIdleConns(cfg.Gorm.MaxIdleConnections)
+	sqlDB.SetMaxOpenConns(cfg.Gorm.MaxOpenConnections)
+
+	// dependencies init
 	validator := validator.New()
-
-	// router init
 	router := mux.NewRouter()
 
 	// repo, usecase, hadnler init
-	accountRepo := account.NewAccountRepository(db, "account")
+	accountRepo := account.NewAccountRepository(db, constant.TableAccount)
 	accountUsecase := account.NewAccountUsecase(accountRepo)
 	account.NewAccountHandler(router, validator, accountUsecase)
 
 	// server init
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%s", "8080"),
+		Addr:    fmt.Sprintf(":%s", cfg.App.Port),
 		Handler: router,
 	}
 
@@ -54,7 +60,7 @@ func main() {
 	signal.Notify(sigterm, syscall.SIGTERM, syscall.SIGINT)
 	<-sigterm
 
-	fmt.Println("shutting down application ...")
+	fmt.Println(constant.MessageGracefulShutown)
 
 	server.Shutdown(context.Background())
 
