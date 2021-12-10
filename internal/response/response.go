@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// TODO: Add http status code
 type Response interface {
 	JSON(w http.ResponseWriter) (err error)
 }

@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
-	"github.com/madeindra/devoria-workshop-to-challenge/response"
+	"github.com/madeindra/devoria-workshop-to-challenge/internal/response"
 )
 
 type AccountHandler struct {

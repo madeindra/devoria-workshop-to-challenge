@@ -1,4 +1,4 @@
-package utils
+package constant
 
 const (
 	MessageGeneralSuccess  = "Success running operation"
