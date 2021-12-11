@@ -7,6 +7,7 @@ import (
 
 	"github.com/madeindra/devoria-workshop-to-challenge/domain/account"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/exception"
+	"github.com/madeindra/devoria-workshop-to-challenge/internal/jwt"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/response"
 )
 
@@ -33,8 +34,7 @@ func NewArticleUsecase(
 }
 
 func (uc *articleUsecaseImpl) CreateArticle(ctx context.Context, params CreateArticleRequest) response.Response {
-	// email := ctx.Value(jwt.EmailContex).(string)
-	email := "examplecar@example.com"
+	email := ctx.Value(jwt.EmailContext).(string)
 
 	author, err := uc.accountRepo.FindByEmail(ctx, email)
 

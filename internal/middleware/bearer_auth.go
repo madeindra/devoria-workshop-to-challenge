@@ -21,14 +21,21 @@ func (be *BearerAuth) VerifyBearer(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		auth := r.Header.Get("Authorization")
-		token := strings.Split(auth, " ")[1]
-		res, err := be.jsonWebToken.Parse(ctx, token, &jwt.AccountStandardJWTClaims{})
+		token := strings.Split(auth, " ")
+
+		if len(token) < 2 {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		res, err := be.jsonWebToken.Parse(ctx, token[1], &jwt.AccountStandardJWTClaims{})
 		if err != nil {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
+
 		claims := (res.Claims).(*jwt.AccountStandardJWTClaims)
-		ctx = context.WithValue(ctx, jwt.EmailContex, claims.Email)
+		ctx = context.WithValue(ctx, jwt.EmailContext, claims.Email)
 
 		next(w, r.WithContext(ctx))
 	})

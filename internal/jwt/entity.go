@@ -4,7 +4,7 @@ import "github.com/dgrijalva/jwt-go"
 
 type AccountContext string
 
-const EmailContex AccountContext = "email"
+const EmailContext AccountContext = "email"
 
 type AccountStandardJWTClaims struct {
 	jwt.StandardClaims
