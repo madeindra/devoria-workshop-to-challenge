@@ -22,6 +22,7 @@ func NewAccountHandler(router *mux.Router, validate *validator.Validate, usecase
 	}
 
 	router.HandleFunc("/v1/accounts/registration", handler.Register).Methods(http.MethodPost)
+	router.HandleFunc("/v1/accounts/login", handler.Login).Methods(http.MethodPost)
 	router.HandleFunc("/v1/accounts/{id:[0-9]+}", handler.GetAccount).Methods(http.MethodGet)
 }
 
@@ -46,6 +47,30 @@ func (handler *AccountHandler) Register(w http.ResponseWriter, r *http.Request) 
 	}
 
 	res = handler.Usecase.Register(ctx, params)
+	res.JSON(w)
+}
+
+func (handler *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
+	var res response.Response
+	var params AccountLoginRequest
+
+	ctx := r.Context()
+
+	err := json.NewDecoder(r.Body).Decode(&params)
+	if err != nil {
+		res = response.Error(response.StatusUnprocessableEntity, err)
+		res.JSON(w)
+		return
+	}
+
+	err = handler.Validate.StructCtx(ctx, params)
+	if err != nil {
+		res = response.Error(response.StatusBadRequest, err)
+		res.JSON(w)
+		return
+	}
+
+	res = handler.Usecase.Login(ctx, params)
 	res.JSON(w)
 }
 

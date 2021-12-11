@@ -1,10 +1,14 @@
 package config
 
 import (
+	"crypto/rsa"
 	"fmt"
+	"io/ioutil"
 	"net/url"
 	"os"
 	"strconv"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 type Config struct {
@@ -19,6 +23,10 @@ type Config struct {
 	Bcrypt struct {
 		HashCost int
 	}
+	Jwt struct {
+		PrivateKey *rsa.PrivateKey
+		PublicKey  *rsa.PublicKey
+	}
 }
 
 func New() *Config {
@@ -26,6 +34,7 @@ func New() *Config {
 	c.loadApp()
 	c.loadGorm()
 	c.loadBcrypt()
+	c.loadKeyPair()
 
 	return c
 }
@@ -70,6 +79,23 @@ func (c *Config) loadBcrypt() *Config {
 	hashCost := os.Getenv("BCRYPT_HASH_COST")
 
 	c.Bcrypt.HashCost, _ = strconv.Atoi(hashCost)
+
+	return c
+}
+
+func (c *Config) loadKeyPair() *Config {
+	// env value
+	privPath := os.Getenv("PRIVATE_KEY")
+	pubPath := os.Getenv("PUBLIC_KEY")
+
+	privateKey, _ := ioutil.ReadFile(privPath)
+	publicKey, _ := ioutil.ReadFile(pubPath)
+
+	signKey, _ := jwt.ParseRSAPrivateKeyFromPEM([]byte(privateKey))
+	verifyKey, _ := jwt.ParseRSAPublicKeyFromPEM([]byte(publicKey))
+
+	c.Jwt.PrivateKey = signKey
+	c.Jwt.PublicKey = verifyKey
 
 	return c
 }

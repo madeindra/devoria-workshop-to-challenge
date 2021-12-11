@@ -18,6 +18,7 @@ import (
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/bcrypt"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/config"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/constant"
+	"github.com/madeindra/devoria-workshop-to-challenge/internal/jwt"
 )
 
 func main() {
@@ -40,10 +41,11 @@ func main() {
 	validator := validator.New()
 	router := mux.NewRouter()
 	bcrypt := bcrypt.NewBcrypt(cfg.Bcrypt.HashCost)
+	jsonWebToken := jwt.NewJSONWebToken(cfg.Jwt.PrivateKey, cfg.Jwt.PublicKey)
 
 	// repo, usecase, hadnler init
 	accountRepo := account.NewAccountRepository(db, constant.TableAccount)
-	accountUsecase := account.NewAccountUsecase(accountRepo, bcrypt)
+	accountUsecase := account.NewAccountUsecase(accountRepo, bcrypt, jsonWebToken)
 	account.NewAccountHandler(router, validator, accountUsecase)
 
 	// server init
