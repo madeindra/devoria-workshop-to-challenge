@@ -22,10 +22,10 @@ func NewArticleHandler(router *mux.Router, basicAuthMiddleware middleware.RouteM
 		Usecase:  usecase,
 	}
 
-	router.HandleFunc("/v1/articles", handler.GetAllArticles).Methods(http.MethodGet)
-	router.HandleFunc("/v1/articles/{id:[0-9]+}", handler.GetOneArticle).Methods(http.MethodGet)
-	router.HandleFunc("/v1/articles", handler.CreateArticle).Methods(http.MethodPost)
-	router.HandleFunc("/v1/articles/{id:[0-9]+}", handler.UpdateArticle).Methods(http.MethodPatch)
+	router.HandleFunc("/v1/articles", bearerAuthMiddleware.VerifyBearer(handler.GetAllArticles)).Methods(http.MethodGet)
+	router.HandleFunc("/v1/articles/{id:[0-9]+}", bearerAuthMiddleware.VerifyBearer(handler.GetOneArticle)).Methods(http.MethodGet)
+	router.HandleFunc("/v1/articles", bearerAuthMiddleware.VerifyBearer(handler.CreateArticle)).Methods(http.MethodPost)
+	router.HandleFunc("/v1/articles/{id:[0-9]+}", bearerAuthMiddleware.VerifyBearer(handler.UpdateArticle)).Methods(http.MethodPatch)
 }
 
 func (handler *ArticleHandler) GetAllArticles(w http.ResponseWriter, r *http.Request) {

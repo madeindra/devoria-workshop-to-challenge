@@ -22,9 +22,10 @@ func NewAccountHandler(router *mux.Router, basicAuthMiddleware middleware.RouteM
 		Usecase:  usecase,
 	}
 
-	router.HandleFunc("/v1/accounts/registration", handler.Register).Methods(http.MethodPost)
-	router.HandleFunc("/v1/accounts/login", handler.Login).Methods(http.MethodPost)
-	router.HandleFunc("/v1/accounts/{id:[0-9]+}", handler.GetAccount).Methods(http.MethodGet)
+	router.HandleFunc("/v1/accounts/registration", basicAuthMiddleware.Verify(handler.Register)).Methods(http.MethodPost)
+	router.HandleFunc("/v1/accounts/login", basicAuthMiddleware.Verify(handler.Login)).Methods(http.MethodPost)
+
+	router.HandleFunc("/v1/accounts/{id:[0-9]+}", bearerAuthMiddleware.VerifyBearer(handler.GetAccount)).Methods(http.MethodGet)
 }
 
 func (handler *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {

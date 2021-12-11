@@ -51,6 +51,7 @@ func (j *jsonWebToken) keyFunc(token *jwt.Token) (interface{}, error) {
 	if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 		return nil, ErrInvalidToken
 	}
+
 	return j.publicKey, nil
 }
 

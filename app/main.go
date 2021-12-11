@@ -43,7 +43,7 @@ func main() {
 	validator := validator.New()
 	router := mux.NewRouter()
 	bcrypt := bcrypt.NewBcrypt(cfg.Bcrypt.HashCost)
-	jsonWebToken := jwt.NewJSONWebToken(cfg.Jwt.PrivateKey, cfg.Jwt.PublicKey)
+	jsonWebToken := jwt.NewJSONWebToken(jwt.GetRSAPrivateKey("./secret/private.key"), jwt.GetRSAPublicKey("./secret/public.key"))
 	basicAuthMiddleware := middleware.NewBasicAuth(cfg.BasicAuth.Username, cfg.BasicAuth.Password)
 	bearerAuthMiddleware := middleware.NewBearerAuth(jsonWebToken)
 
