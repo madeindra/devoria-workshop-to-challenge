@@ -119,8 +119,6 @@ func (uc *accountUsecaseImpl) Login(ctx context.Context, params AccountLoginRequ
 
 // Get Account usecase
 func (uc *accountUsecaseImpl) GetAccount(ctx context.Context, ID int64) response.Response {
-	account := Account{}
-
 	// query account
 	account, err := uc.repository.FindByID(ctx, ID)
 

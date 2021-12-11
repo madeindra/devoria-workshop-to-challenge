@@ -69,12 +69,52 @@ func (uc *articleUsecaseImpl) CreateArticle(ctx context.Context, params CreateAr
 }
 
 func (uc *articleUsecaseImpl) UpdateArticle(ctx context.Context, params UpdateArticleRequest) response.Response {
-	return response.Success(response.StatusOK, nil)
+	article, err := uc.repository.FindByID(ctx, params.ID)
+	if err == exception.ErrNotFound {
+		return response.Error(response.StatusNotFound, exception.ErrNotFound)
+	}
+
+	if err != nil {
+		return response.Error(response.StatusInternalServerError, exception.ErrInternalServer)
+	}
+
+	currentTime := time.Now()
+
+	if params.Title != "" {
+		article.Title = params.Title
+	}
+
+	if params.Subtitle != "" {
+		article.Subtitle = params.Subtitle
+	}
+
+	if params.Content != "" {
+		article.Content = params.Content
+	}
+
+	if params.Status != "" {
+		article.Status = params.Status
+
+		if params.Status == ArticleStatusPublished {
+			article.PublishedAt = &currentTime
+		}
+	}
+
+	article.LastModifiedAt = &currentTime
+
+	err = uc.repository.Update(ctx, params.ID, article)
+	if err == exception.ErrNotFound {
+		return response.Error(response.StatusNotFound, exception.ErrNotFound)
+	}
+
+	if err != nil {
+		return response.Error(response.StatusInternalServerError, exception.ErrNotFound)
+	}
+
+	return response.Success(response.StatusOK, article)
 }
 
 func (uc *articleUsecaseImpl) GetOneArticle(ctx context.Context, ID int64) response.Response {
-	article := Article{}
-
 	article, err := uc.repository.FindByID(ctx, ID)
 
 	if err == exception.ErrNotFound {
