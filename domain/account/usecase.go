@@ -12,7 +12,7 @@ import (
 type AccountUsecase interface {
 	Register(ctx context.Context, params AccountRegisterRequest) response.Response
 	Login(ctx context.Context, params AccountLoginRequest) response.Response
-	GetAccount(ctx context.Context) response.Response
+	GetAccount(ctx context.Context, ID int64) response.Response
 }
 
 type accountUsecaseImpl struct {
@@ -69,6 +69,19 @@ func (uc *accountUsecaseImpl) Login(ctx context.Context, params AccountLoginRequ
 }
 
 // Get Account usecase
-func (uc *accountUsecaseImpl) GetAccount(ctx context.Context) response.Response {
-	return response.Success(response.StatusOK, ctx)
+func (uc *accountUsecaseImpl) GetAccount(ctx context.Context, ID int64) response.Response {
+	account := Account{}
+
+	account, err := uc.repository.FindByID(ctx, ID)
+	if err == exception.ErrNotFound {
+		return response.Error(response.StatusNotFound, exception.ErrNotFound)
+	}
+
+	if err != nil {
+		return response.Error(response.StatusInternalServerError, exception.ErrInternalServer)
+	}
+
+	account.Password = nil
+
+	return response.Success(response.StatusOK, account)
 }

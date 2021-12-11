@@ -3,6 +3,7 @@ package account
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
@@ -21,10 +22,10 @@ func NewAccountHandler(router *mux.Router, validate *validator.Validate, usecase
 	}
 
 	router.HandleFunc("/v1/accounts/registration", handler.Register).Methods(http.MethodPost)
+	router.HandleFunc("/v1/accounts/{id:[0-9]+}", handler.GetAccount).Methods(http.MethodGet)
 }
 
 func (handler *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
-	//TODO: add checking duplicate username / email
 	var res response.Response
 	var params AccountRegisterRequest
 
@@ -46,5 +47,14 @@ func (handler *AccountHandler) Register(w http.ResponseWriter, r *http.Request) 
 
 	res = handler.Usecase.Register(ctx, params)
 	res.JSON(w)
+}
 
+func (handler *AccountHandler) GetAccount(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	vars := mux.Vars(r)
+	id, _ := strconv.ParseInt(vars["id"], 10, 64)
+
+	res := handler.Usecase.GetAccount(ctx, id)
+	res.JSON(w)
 }
