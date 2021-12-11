@@ -35,7 +35,7 @@ func NewAccountRepository(db *sql.DB, tableName string) ArticleRepository {
 func (repo *articleRepositoryImpl) FindByID(ctx context.Context, ID int64) (Article, error) {
 	article := Article{}
 
-	query := fmt.Sprintf(`SELECT id, title, subtitle, content, status, createdAt, lastModifiedAt, firstName, lastName, email, authorId FROM %s WHERE id = ? JOIN %s ON %s.authorId =%s.id`, repo.tableName, constant.TableAccount, repo.tableName, constant.TableAccount)
+	query := fmt.Sprintf(`SELECT %s.id, title, subtitle, content, status, %s.createdAt, publishedAt, %s.lastModifiedAt, authorId, email, firstName, lastName, accounts.createdAt, %s.lastModifiedAt FROM %s JOIN %s ON %s.authorId = %s.id AND %s.id = ?`, repo.tableName, repo.tableName, repo.tableName, constant.TableAccount, repo.tableName, constant.TableAccount, repo.tableName, constant.TableAccount, repo.tableName)
 	stmt, err := repo.db.PrepareContext(ctx, query)
 	if err != nil {
 		log.Println(err)
@@ -53,10 +53,16 @@ func (repo *articleRepositoryImpl) FindByID(ctx context.Context, ID int64) (Arti
 		&article.Title,
 		&article.Subtitle,
 		&article.Content,
+		&article.Status,
 		&article.CreatedAt,
 		&publishedAt,
 		&lastModifiedAt,
 		&article.Author.ID,
+		&article.Author.Email,
+		&article.Author.FirstName,
+		&article.Author.LastName,
+		&article.Author.CreatedAt,
+		&article.Author.LastModifiedAt,
 	)
 
 	if err != nil {
@@ -78,7 +84,7 @@ func (repo *articleRepositoryImpl) FindByID(ctx context.Context, ID int64) (Arti
 func (repo *articleRepositoryImpl) FindAll(ctx context.Context) ([]Article, error) {
 	articles := []Article{}
 
-	query := fmt.Sprintf(`SELECT %s.id, title, subtitle, content, status, %s.createdAt, publishedAt, %s.lastModifiedAt, authorId, email, firstName, lastName, accounts.createdAt, %s.lastModifiedAt  FROM %s JOIN %s ON %s.authorId = %s.id`, repo.tableName, repo.tableName, repo.tableName, constant.TableAccount, repo.tableName, constant.TableAccount, repo.tableName, constant.TableAccount)
+	query := fmt.Sprintf(`SELECT %s.id, title, subtitle, content, status, %s.createdAt, publishedAt, %s.lastModifiedAt, authorId, email, firstName, lastName, accounts.createdAt, %s.lastModifiedAt FROM %s JOIN %s ON %s.authorId = %s.id`, repo.tableName, repo.tableName, repo.tableName, constant.TableAccount, repo.tableName, constant.TableAccount, repo.tableName, constant.TableAccount)
 
 	stmt, err := repo.db.PrepareContext(ctx, query)
 	if err != nil {

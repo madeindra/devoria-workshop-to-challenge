@@ -73,7 +73,19 @@ func (uc *articleUsecaseImpl) UpdateArticle(ctx context.Context, params UpdateAr
 }
 
 func (uc *articleUsecaseImpl) GetOneArticle(ctx context.Context, ID int64) response.Response {
-	return response.Success(response.StatusOK, nil)
+	article := Article{}
+
+	article, err := uc.repository.FindByID(ctx, ID)
+
+	if err == exception.ErrNotFound {
+		return response.Error(response.StatusNotFound, exception.ErrNotFound)
+	}
+
+	if err != nil {
+		return response.Error(response.StatusInternalServerError, exception.ErrInternalServer)
+	}
+
+	return response.Success(response.StatusOK, article)
 }
 
 func (uc *articleUsecaseImpl) GetAllArticles(ctx context.Context) response.Response {
