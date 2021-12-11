@@ -118,8 +118,8 @@ func (repo *accountRepositoryImpl) FindByEmail(ctx context.Context, email string
 
 // Insert into Account
 func (repo *accountRepositoryImpl) Create(ctx context.Context, account Account) (int64, error) {
-	command := fmt.Sprintf("INSERT INTO %s (email, password, firstName, lastName, createdAt) VALUES (?, ?, ?, ?, ?)", repo.tableName)
-	stmt, err := repo.db.PrepareContext(ctx, command)
+	query := fmt.Sprintf("INSERT INTO %s (email, password, firstName, lastName, createdAt) VALUES (?, ?, ?, ?, ?)", repo.tableName)
+	stmt, err := repo.db.PrepareContext(ctx, query)
 	if err != nil {
 		return 0, err
 	}
