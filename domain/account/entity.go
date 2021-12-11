@@ -6,6 +6,10 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+type AccountContext string
+
+const EmailContex AccountContext = "email"
+
 // properties of account
 // json attributes will set the field name on json form
 type Account struct {

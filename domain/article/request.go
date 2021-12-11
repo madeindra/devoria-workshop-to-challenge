@@ -2,9 +2,10 @@ package article
 
 // Request body for account registration
 type CreateArticleRequest struct {
-	Title    string `json:"title" validate:"required"`
-	Subtitle string `json:"subtitle" validate:"required"`
-	Content  string `json:"content" validate:"required"`
+	Title       string `json:"title" validate:"required"`
+	Subtitle    string `json:"subtitle" validate:"required"`
+	Content     string `json:"content" validate:"required"`
+	IsPublished bool   `json:"isPublished"`
 }
 
 // Request body for account login
