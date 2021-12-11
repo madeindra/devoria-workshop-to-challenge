@@ -2,10 +2,11 @@ package article
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/response"
 )
@@ -24,7 +25,7 @@ func NewArticleHandler(router *mux.Router, validate *validator.Validate, usecase
 	router.HandleFunc("/v1/articles", handler.GetAllArticles).Methods(http.MethodGet)
 	router.HandleFunc("/v1/articles/{id:[0-9]+}", handler.GetOneArticle).Methods(http.MethodGet)
 	router.HandleFunc("/v1/articles", handler.CreateArticle).Methods(http.MethodPost)
-	router.HandleFunc("/v1/articles", handler.UpdateArticle).Methods(http.MethodPut)
+	router.HandleFunc("/v1/articles/{id:[0-9]+}", handler.UpdateArticle).Methods(http.MethodPatch)
 }
 
 func (handler *ArticleHandler) GetAllArticles(w http.ResponseWriter, r *http.Request) {
@@ -86,12 +87,20 @@ func (handler *ArticleHandler) UpdateArticle(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	if params.Status != ArticleStatusDraft && params.Status != ArticleStatusPublished && params.Status != ArticleStatusArchived {
+		res = response.Error(response.StatusBadRequest, err)
+		res.JSON(w)
+		return
+	}
+
 	err = handler.Validate.StructCtx(ctx, params)
 	if err != nil {
 		res = response.Error(response.StatusBadRequest, err)
 		res.JSON(w)
 		return
 	}
+
+	fmt.Println(params)
 
 	res = handler.Usecase.UpdateArticle(ctx, params)
 	res.JSON(w)

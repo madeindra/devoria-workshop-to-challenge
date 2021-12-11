@@ -15,6 +15,7 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/madeindra/devoria-workshop-to-challenge/domain/account"
+	"github.com/madeindra/devoria-workshop-to-challenge/domain/article"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/bcrypt"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/config"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/constant"
@@ -43,10 +44,16 @@ func main() {
 	bcrypt := bcrypt.NewBcrypt(cfg.Bcrypt.HashCost)
 	jsonWebToken := jwt.NewJSONWebToken(cfg.Jwt.PrivateKey, cfg.Jwt.PublicKey)
 
-	// repo, usecase, hadnler init
+	// repo, usecase
 	accountRepo := account.NewAccountRepository(db, constant.TableAccount)
 	accountUsecase := account.NewAccountUsecase(accountRepo, bcrypt, jsonWebToken)
+
+	articleRepo := article.NewAccountRepository(db, constant.TableArticle)
+	articleUsecase := article.NewArticleUsecase(articleRepo, accountRepo)
+
+	// router to handler mapping
 	account.NewAccountHandler(router, validator, accountUsecase)
+	article.NewArticleHandler(router, validator, articleUsecase)
 
 	// server init
 	server := &http.Server{
