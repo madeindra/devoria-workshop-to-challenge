@@ -27,6 +27,10 @@ type Config struct {
 		PrivateKey *rsa.PrivateKey
 		PublicKey  *rsa.PublicKey
 	}
+	BasicAuth struct {
+		Username string
+		Password string
+	}
 }
 
 func New() *Config {
@@ -35,6 +39,7 @@ func New() *Config {
 	c.loadGorm()
 	c.loadBcrypt()
 	c.loadKeyPair()
+	c.loadBasicAuth()
 
 	return c
 }
@@ -96,6 +101,16 @@ func (c *Config) loadKeyPair() *Config {
 
 	c.Jwt.PrivateKey = signKey
 	c.Jwt.PublicKey = verifyKey
+
+	return c
+}
+
+func (c *Config) loadBasicAuth() *Config {
+	username := os.Getenv("BASIC_AUTH_USERNAME")
+	password := os.Getenv("BASIC_AUTH_PASSWORD")
+
+	c.BasicAuth.Username = username
+	c.BasicAuth.Password = password
 
 	return c
 }

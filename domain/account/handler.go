@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
+	"github.com/madeindra/devoria-workshop-to-challenge/internal/middleware"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/response"
 )
 
@@ -15,7 +16,7 @@ type AccountHandler struct {
 	Usecase  AccountUsecase
 }
 
-func NewAccountHandler(router *mux.Router, validate *validator.Validate, usecase AccountUsecase) {
+func NewAccountHandler(router *mux.Router, basicAuthMiddleware middleware.RouteMiddleware, bearerAuthMiddleware middleware.RouteMiddlewareBearer, validate *validator.Validate, usecase AccountUsecase) {
 	handler := &AccountHandler{
 		Validate: validate,
 		Usecase:  usecase,

@@ -98,7 +98,7 @@ func (uc *accountUsecaseImpl) Login(ctx context.Context, params AccountLoginRequ
 	account.Password = nil
 
 	// generate token
-	claims := AccountStandardJWTClaims{}
+	claims := jwt.AccountStandardJWTClaims{}
 	claims.Email = account.Email
 	claims.Subject = fmt.Sprintf("%d", account.ID)
 	claims.IssuedAt = time.Now().Unix()

@@ -17,7 +17,7 @@ var (
 // JWT interface
 type JSONWebToken interface {
 	Sign(ctx context.Context, claims jwt.Claims) (string, error)
-	Parse(ctx context.Context, tokenString string, claims jwt.Claims) error
+	Parse(ctx context.Context, tokenString string, claims jwt.Claims) (*jwt.Token, error)
 }
 
 type jsonWebToken struct {
@@ -34,17 +34,17 @@ func (j *jsonWebToken) Sign(ctx context.Context, claims jwt.Claims) (string, err
 	return token.SignedString(j.privateKey)
 }
 
-func (j *jsonWebToken) Parse(ctx context.Context, tokenString string, claims jwt.Claims) error {
+func (j *jsonWebToken) Parse(ctx context.Context, tokenString string, claims jwt.Claims) (*jwt.Token, error) {
 	token, err := jwt.ParseWithClaims(tokenString, claims, j.keyFunc)
 	if err = j.checkError(err); err != nil {
-		return nil
+		return token, nil
 	}
 
 	if !token.Valid {
-		return ErrInvalidToken
+		return token, ErrInvalidToken
 	}
 
-	return nil
+	return token, nil
 }
 
 func (j *jsonWebToken) keyFunc(token *jwt.Token) (interface{}, error) {

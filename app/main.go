@@ -20,6 +20,7 @@ import (
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/config"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/constant"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/jwt"
+	"github.com/madeindra/devoria-workshop-to-challenge/internal/middleware"
 )
 
 func main() {
@@ -43,6 +44,8 @@ func main() {
 	router := mux.NewRouter()
 	bcrypt := bcrypt.NewBcrypt(cfg.Bcrypt.HashCost)
 	jsonWebToken := jwt.NewJSONWebToken(cfg.Jwt.PrivateKey, cfg.Jwt.PublicKey)
+	basicAuthMiddleware := middleware.NewBasicAuth(cfg.BasicAuth.Username, cfg.BasicAuth.Password)
+	bearerAuthMiddleware := middleware.NewBearerAuth(jsonWebToken)
 
 	// repo, usecase
 	accountRepo := account.NewAccountRepository(db, constant.TableAccount)
@@ -52,8 +55,8 @@ func main() {
 	articleUsecase := article.NewArticleUsecase(articleRepo, accountRepo)
 
 	// router to handler mapping
-	account.NewAccountHandler(router, validator, accountUsecase)
-	article.NewArticleHandler(router, validator, articleUsecase)
+	account.NewAccountHandler(router, basicAuthMiddleware, bearerAuthMiddleware, validator, accountUsecase)
+	article.NewArticleHandler(router, basicAuthMiddleware, bearerAuthMiddleware, validator, articleUsecase)
 
 	// server init
 	server := &http.Server{

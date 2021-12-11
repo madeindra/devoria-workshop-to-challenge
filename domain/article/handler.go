@@ -2,12 +2,12 @@ package article
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
+	"github.com/madeindra/devoria-workshop-to-challenge/internal/middleware"
 	"github.com/madeindra/devoria-workshop-to-challenge/internal/response"
 )
 
@@ -16,7 +16,7 @@ type ArticleHandler struct {
 	Usecase  ArticleUsecase
 }
 
-func NewArticleHandler(router *mux.Router, validate *validator.Validate, usecase ArticleUsecase) {
+func NewArticleHandler(router *mux.Router, basicAuthMiddleware middleware.RouteMiddleware, bearerAuthMiddleware middleware.RouteMiddlewareBearer, validate *validator.Validate, usecase ArticleUsecase) {
 	handler := &ArticleHandler{
 		Validate: validate,
 		Usecase:  usecase,
@@ -99,8 +99,6 @@ func (handler *ArticleHandler) UpdateArticle(w http.ResponseWriter, r *http.Requ
 		res.JSON(w)
 		return
 	}
-
-	fmt.Println(params)
 
 	res = handler.Usecase.UpdateArticle(ctx, params)
 	res.JSON(w)

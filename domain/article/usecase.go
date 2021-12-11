@@ -33,7 +33,8 @@ func NewArticleUsecase(
 }
 
 func (uc *articleUsecaseImpl) CreateArticle(ctx context.Context, params CreateArticleRequest) response.Response {
-	email := ctx.Value(account.EmailContex).(string)
+	// email := ctx.Value(jwt.EmailContex).(string)
+	email := "examplecar@example.com"
 
 	author, err := uc.accountRepo.FindByEmail(ctx, email)
 
