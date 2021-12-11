@@ -10,14 +10,14 @@ type Response interface {
 	JSON(w http.ResponseWriter) (err error)
 }
 
-type responseImpl struct {
+type ResponseImpl struct {
 	err    error
 	Status string      `json:"status"`
 	Data   interface{} `json:"data"`
 }
 
 func Success(status string, data interface{}) (resp Response) {
-	return &responseImpl{
+	return &ResponseImpl{
 		err:    nil,
 		Status: status,
 		Data:   data,
@@ -25,14 +25,14 @@ func Success(status string, data interface{}) (resp Response) {
 }
 
 func Error(status string, err error) (resp Response) {
-	return &responseImpl{
+	return &ResponseImpl{
 		err:    err,
 		Status: status,
 		Data:   nil,
 	}
 }
 
-func (r *responseImpl) getStatusCode(status string) (statusCode int) {
+func (r *ResponseImpl) getStatusCode(status string) (statusCode int) {
 	switch status {
 	case StatusOK:
 		return http.StatusOK
@@ -57,11 +57,11 @@ func (r *responseImpl) getStatusCode(status string) (statusCode int) {
 	}
 }
 
-func (r *responseImpl) Err() (err error) {
+func (r *ResponseImpl) Err() (err error) {
 	return r.err
 }
 
-func (r *responseImpl) JSON(w http.ResponseWriter) error {
+func (r *ResponseImpl) JSON(w http.ResponseWriter) error {
 	statusCode := r.getStatusCode(r.Status)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
