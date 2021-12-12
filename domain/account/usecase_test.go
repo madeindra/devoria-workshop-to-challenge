@@ -19,14 +19,13 @@ func TestMain(m *testing.M) {
 
 func TestUsecaseRegister_Success(t *testing.T) {
 	jsonWebToken := new(jsonWebTokenMocks.JSONWebToken)
-	jsonWebToken.On("Sign", mock.Anything, mock.AnythingOfType("jwt.AccountStandardJWTClaims")).Return("mock token", nil)
-
 	bcrypt := new(bcryptMocks.Bcrypt)
-	bcrypt.On("HashPassword", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return("hashed password")
-
 	accountRepository := new(mocks.AccountRepository)
+
+	bcrypt.On("HashPassword", mock.AnythingOfType("string")).Return("hashed password", nil)
+
 	accountRepository.On("FindByEmail", mock.Anything, mock.AnythingOfType("string")).Return(account.Account{}, exception.ErrNotFound)
-	accountRepository.On("Save", mock.Anything, mock.AnythingOfType("account.Account")).Return(int64(1), nil)
+	accountRepository.On("Create", mock.Anything, mock.AnythingOfType("account.Account")).Return(int64(1), nil)
 
 	accountUsecase := account.NewAccountUsecase(
 		accountRepository,
@@ -44,6 +43,96 @@ func TestUsecaseRegister_Success(t *testing.T) {
 	resp := accountUsecase.Register(ctx, params)
 
 	assert.NoError(t, resp.Err())
+
+	accountRepository.AssertExpectations(t)
+	jsonWebToken.AssertExpectations(t)
+	bcrypt.AssertExpectations(t)
+}
+
+func TestUsecaseRegister_CreateError(t *testing.T) {
+	jsonWebToken := new(jsonWebTokenMocks.JSONWebToken)
+	bcrypt := new(bcryptMocks.Bcrypt)
+	accountRepository := new(mocks.AccountRepository)
+
+	bcrypt.On("HashPassword", mock.AnythingOfType("string")).Return("hashed password", nil)
+
+	accountRepository.On("FindByEmail", mock.Anything, mock.AnythingOfType("string")).Return(account.Account{}, exception.ErrNotFound)
+	accountRepository.On("Create", mock.Anything, mock.AnythingOfType("account.Account")).Return(int64(0), exception.ErrInternalServer)
+
+	accountUsecase := account.NewAccountUsecase(
+		accountRepository,
+		bcrypt,
+		jsonWebToken,
+	)
+
+	ctx := context.TODO()
+	params := account.AccountRegisterRequest{
+		Email:     "user@example.com",
+		Password:  "secret",
+		FirstName: "test",
+		LastName:  "test",
+	}
+	resp := accountUsecase.Register(ctx, params)
+
+	assert.Error(t, resp.Err())
+
+	accountRepository.AssertExpectations(t)
+	jsonWebToken.AssertExpectations(t)
+	bcrypt.AssertExpectations(t)
+}
+
+func TestUsecaseRegister_Conflict(t *testing.T) {
+	jsonWebToken := new(jsonWebTokenMocks.JSONWebToken)
+	bcrypt := new(bcryptMocks.Bcrypt)
+	accountRepository := new(mocks.AccountRepository)
+
+	accountRepository.On("FindByEmail", mock.Anything, mock.AnythingOfType("string")).Return(account.Account{}, nil)
+
+	accountUsecase := account.NewAccountUsecase(
+		accountRepository,
+		bcrypt,
+		jsonWebToken,
+	)
+
+	ctx := context.TODO()
+	params := account.AccountRegisterRequest{
+		Email:     "user@example.com",
+		Password:  "secret",
+		FirstName: "test",
+		LastName:  "test",
+	}
+	resp := accountUsecase.Register(ctx, params)
+
+	assert.Error(t, resp.Err())
+
+	accountRepository.AssertExpectations(t)
+	jsonWebToken.AssertExpectations(t)
+	bcrypt.AssertExpectations(t)
+}
+
+func TestUsecaseRegister_InternalError(t *testing.T) {
+	jsonWebToken := new(jsonWebTokenMocks.JSONWebToken)
+	bcrypt := new(bcryptMocks.Bcrypt)
+	accountRepository := new(mocks.AccountRepository)
+
+	accountRepository.On("FindByEmail", mock.Anything, mock.AnythingOfType("string")).Return(account.Account{}, exception.ErrInternalServer)
+
+	accountUsecase := account.NewAccountUsecase(
+		accountRepository,
+		bcrypt,
+		jsonWebToken,
+	)
+
+	ctx := context.TODO()
+	params := account.AccountRegisterRequest{
+		Email:     "user@example.com",
+		Password:  "secret",
+		FirstName: "test",
+		LastName:  "test",
+	}
+	resp := accountUsecase.Register(ctx, params)
+
+	assert.Error(t, resp.Err())
 
 	accountRepository.AssertExpectations(t)
 	jsonWebToken.AssertExpectations(t)
