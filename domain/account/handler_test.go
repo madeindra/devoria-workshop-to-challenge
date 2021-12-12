@@ -110,3 +110,93 @@ func TestRegister_Success(t *testing.T) {
 
 	accountUsecase.AssertExpectations(t)
 }
+
+func TestLogin_Failed(t *testing.T) {
+	type invalidReq struct {
+		Data string
+	}
+
+	loginReq := invalidReq{
+		Data: "error",
+	}
+
+	validate := validator.New()
+
+	accountUsecase := new(mocks.AccountUsecase)
+
+	newAccountLoginRequestBuff, _ := json.Marshal(loginReq)
+
+	accountHandler := account.AccountHandler{
+		Validate: validate,
+		Usecase:  accountUsecase,
+	}
+
+	r := httptest.NewRequest(http.MethodPost, "/just/for/testing", bytes.NewReader(newAccountLoginRequestBuff))
+	recorder := httptest.NewRecorder()
+
+	handler := http.HandlerFunc(accountHandler.Login)
+	handler.ServeHTTP(recorder, r)
+
+	rb := response.ResponseImpl{}
+	if err := json.NewDecoder(recorder.Body).Decode(&rb); err != nil {
+		t.Error(err)
+		return
+	}
+
+	assert.Equal(t, response.StatusBadRequest, rb.Status, "should be bad request")
+	assert.Nil(t, rb.Data, "should be nil")
+
+	accountUsecase.AssertExpectations(t)
+	accountUsecase.AssertExpectations(t)
+}
+
+func TestLogin_Success(t *testing.T) {
+	loginReq := account.AccountLoginRequest{
+		Email:    "user@example.com",
+		Password: "secret",
+	}
+
+	loginRes := account.AccountAuthenticationResponse{
+		Token:   "jwt token",
+		Profile: account.Account{},
+	}
+
+	resp := response.Success(response.StatusOK, loginRes)
+
+	validate := validator.New()
+
+	accountUsecase := new(mocks.AccountUsecase)
+	accountUsecase.On("Login", mock.Anything, mock.AnythingOfType("account.AccountLoginRequest")).Return(resp)
+
+	newAccountLoginRequestBuff, _ := json.Marshal(loginReq)
+
+	accountHandler := account.AccountHandler{
+		Validate: validate,
+		Usecase:  accountUsecase,
+	}
+
+	r := httptest.NewRequest(http.MethodPost, "/just/for/testing", bytes.NewReader(newAccountLoginRequestBuff))
+	recorder := httptest.NewRecorder()
+
+	handler := http.HandlerFunc(accountHandler.Login)
+	handler.ServeHTTP(recorder, r)
+
+	rb := response.ResponseImpl{}
+	if err := json.NewDecoder(recorder.Body).Decode(&rb); err != nil {
+		t.Error(err)
+		return
+	}
+
+	assert.Equal(t, response.StatusOK, rb.Status, fmt.Sprintf("should be status '%s'", response.StatusOK))
+	assert.NotNil(t, rb.Data, "should not be nil")
+
+	data, ok := rb.Data.(map[string]interface{})
+	if !ok {
+		t.Error("response data isn't a type of 'map[string]interface{}'")
+		return
+	}
+
+	assert.Equal(t, loginRes.Token, data["token"], fmt.Sprintf("token should be '%s'", loginRes.Token))
+
+	accountUsecase.AssertExpectations(t)
+}
