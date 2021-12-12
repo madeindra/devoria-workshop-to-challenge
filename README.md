@@ -45,6 +45,86 @@ or to generate coverage report, run
 make cover
 ```
 
+## Accounts API
+### Registration
+* Endpoint: `/v1/accounts/registration`
+* Method: `POST`
+* Authorization: Basic
+* Request Body
+```
+{
+    "email": "example@example.com",
+    "password": "test",
+    "firstName": "test",
+    "lastName": "test"
+}
+```
+
+### Login
+* Endpoint: `/v1/accounts/login`
+* Method: `POST`
+* Authorization: Basic
+* Request Body
+```
+{
+    "email": "example@example.com",
+    "password": "test",
+}
+```
+### Get Account
+* Endpoint: `/v1/accounts/:id`
+* Method: `GET`
+* Authorization: Bearer
+* Example
+```
+/v1/accounts/1
+```
+
+## Get All Articles
+* Endpoint: `/v1/articles`
+* Method: `GET`
+* Authorization: Bearer
+
+## Get an Article
+* Endpoint: `/v1/articles/:id`
+* Method: `GET`
+* Authorization: Bearer
+* Example
+```
+/v1/articles/1
+```
+
+## Create a new Article
+* Endpoint: `/v1/articles`
+* Method: `POST`
+* Authorization: Bearer
+* Request Body
+```
+{
+    "title": "lorem",
+    "subtitle": "ipsum",
+    "content": "hello world",
+    "isPublished": true
+}
+```
+
+## Update an Article
+* Endpoint: `/v1/articles`
+* Method: `PATCH`
+* Authorization: Bearer
+* Example
+```
+/v1/articles/1
+```
+* Request Body
+```
+{
+    "title": "lorem",
+    "subtitle": "ipsum",
+    "content": "hello world",
+    "status": "ARCHIVED"
+}
+```
 ## Test Case
 ### Account Handler
 * 2 functions tested
