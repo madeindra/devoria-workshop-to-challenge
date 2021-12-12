@@ -33,8 +33,19 @@ make run.dev
 ```
 
 ## Unit Test
-With `mockery` & `sqlmock`
+Unit tests are created with `mockery` & `sqlmock`
 
+To run it, run
+```
+make test
+```
+
+or to generate coverage report, run
+```
+make cover
+```
+
+## Test Case
 ### Account Handler
 * 2 functions tested
 * 2 success test scenario
