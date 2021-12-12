@@ -17,7 +17,44 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func TestRegister(t *testing.T) {
+func TestRegister_Failed(t *testing.T) {
+	type invalidReq struct {
+		Data string
+	}
+
+	newAccountReq := invalidReq{
+		Data: "error",
+	}
+
+	validate := validator.New()
+	accountUsecase := new(mocks.AccountUsecase)
+
+	newAccountRegisterRequestBuff, _ := json.Marshal(newAccountReq)
+
+	accountHandler := account.AccountHandler{
+		Validate: validate,
+		Usecase:  accountUsecase,
+	}
+
+	r := httptest.NewRequest(http.MethodPost, "/just/for/testing", bytes.NewReader(newAccountRegisterRequestBuff))
+	recorder := httptest.NewRecorder()
+
+	handler := http.HandlerFunc(accountHandler.Register)
+	handler.ServeHTTP(recorder, r)
+
+	rb := response.ResponseImpl{}
+	if err := json.NewDecoder(recorder.Body).Decode(&rb); err != nil {
+		t.Error(err)
+		return
+	}
+
+	assert.Equal(t, response.StatusBadRequest, rb.Status, "should be bad request")
+	assert.Nil(t, rb.Data, "should be nil")
+
+	accountUsecase.AssertExpectations(t)
+}
+
+func TestRegister_Success(t *testing.T) {
 	newAccountReq := account.AccountRegisterRequest{
 		Email:     "user@example.com",
 		Password:  "secret",
