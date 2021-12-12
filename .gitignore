@@ -21,6 +21,8 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+coverage
+
 ### Go Patch ###
 /vendor/
 /Godeps/
