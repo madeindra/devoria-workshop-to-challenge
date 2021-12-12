@@ -17,6 +17,8 @@ Features are stored in **domain** directory with following naming:
 
 Other internally used files are stored in **internal**.
 
+Postman Collections & other docs are stored in **docs**.
+
 ## Run
 1.  Run dependencies
 ```

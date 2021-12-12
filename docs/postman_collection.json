@@ -1,0 +1,273 @@
+{
+	"info": {
+		"_postman_id": "b8184f43-0000-4283-8807-5ffbbaf8d4e3",
+		"name": "Devoria WTC",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Register",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "user",
+							"type": "string"
+						},
+						{
+							"key": "showPassword",
+							"value": false,
+							"type": "boolean"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"examplecar@example.com\",\n    \"password\": \"testerxs\",\n    \"firstName\": \"test\",\n    \"lastName\": \"test\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8081/v1/accounts/registration",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"v1",
+						"accounts",
+						"registration"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "user",
+							"type": "string"
+						},
+						{
+							"key": "showPassword",
+							"value": false,
+							"type": "boolean"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"examplecar@example.com\",\n    \"password\": \"testerxs\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8081/v1/accounts/login",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"v1",
+						"accounts",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Profile",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzkzMjA4MjIsImlhdCI6MTYzOTIzNDQyMiwic3ViIjoiMSIsImVtYWlsIjoiZXhhbXBsZWNhckBleGFtcGxlLmNvbSJ9.gReEQEPz7vKQpoNHCirNRWMT2zxPfAsTNMDW91KvTZsH0bNSOpk0jEoDjtvV0DOwkKxiqEhpw3JjcrUWC5Py5g6w-q0h0Xh3_uV4WvtY-T0bAu7ulHiNdwneoLebfe-x9FC9XGi-GPS1pp42d4n3Adx5ie720J0W_APnmX29hZZa4CEWUP407LZhMeAU8ML1c98fIdw9a7-wlVxxgdHi0n8908sv0rkTgABdsCOxsYsVtZJaE377X0_5syidTlY2l9_JmWa-jDV9mfHKvUwLncxbg5QCGxtMfd1PpX2sRWCrOb_3seJ-Vd9JdVOLiP4GqV0nSwuZCk2X_cB5FPIpnQ",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8081/v1/accounts/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"v1",
+						"accounts",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Articles",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzkzMTkxMDgsImlhdCI6MTYzOTIzMjcwOCwic3ViIjoiMSIsImVtYWlsIjoiZXhhbXBsZWNhckBleGFtcGxlLmNvbSJ9.PM4Elmj16AjbIj_DPZqpgkM94ekbhzo1zDW_dg-2odDXwCPvX4gu9wCUvMDaGODlqW4CPC5H5z9EfQU13FX3Ib0v4uBFJTqowDWrqQ7ciXwU2Eir8ag5Td7nSNYRDdOanPsjjBtg9RhsqKkOiln9Bl8MI1rua3eLdI09eY1LUHKarn0UsqbJpOiy01ZaD7afQphOvmZezn21jVL82c657TpxRziDbqJSb4FaZaS7SCjuudC2wv_cATEx3wVsQ78y6-PNWYlrwLrWOhaP5Csj5OpdIGX4-gW3jXqWyj6_DnKEl8pbWz5DEnN7fERjwoejhR65rm7jSUuxR9_bwuUr0w",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8081/v1/articles",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"v1",
+						"articles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get One Article",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzkzMTkxMDgsImlhdCI6MTYzOTIzMjcwOCwic3ViIjoiMSIsImVtYWlsIjoiZXhhbXBsZWNhckBleGFtcGxlLmNvbSJ9.PM4Elmj16AjbIj_DPZqpgkM94ekbhzo1zDW_dg-2odDXwCPvX4gu9wCUvMDaGODlqW4CPC5H5z9EfQU13FX3Ib0v4uBFJTqowDWrqQ7ciXwU2Eir8ag5Td7nSNYRDdOanPsjjBtg9RhsqKkOiln9Bl8MI1rua3eLdI09eY1LUHKarn0UsqbJpOiy01ZaD7afQphOvmZezn21jVL82c657TpxRziDbqJSb4FaZaS7SCjuudC2wv_cATEx3wVsQ78y6-PNWYlrwLrWOhaP5Csj5OpdIGX4-gW3jXqWyj6_DnKEl8pbWz5DEnN7fERjwoejhR65rm7jSUuxR9_bwuUr0w",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8081/v1/articles/6",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"v1",
+						"articles",
+						"6"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create an Article",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzkzMTkxMDgsImlhdCI6MTYzOTIzMjcwOCwic3ViIjoiMSIsImVtYWlsIjoiZXhhbXBsZWNhckBleGFtcGxlLmNvbSJ9.PM4Elmj16AjbIj_DPZqpgkM94ekbhzo1zDW_dg-2odDXwCPvX4gu9wCUvMDaGODlqW4CPC5H5z9EfQU13FX3Ib0v4uBFJTqowDWrqQ7ciXwU2Eir8ag5Td7nSNYRDdOanPsjjBtg9RhsqKkOiln9Bl8MI1rua3eLdI09eY1LUHKarn0UsqbJpOiy01ZaD7afQphOvmZezn21jVL82c657TpxRziDbqJSb4FaZaS7SCjuudC2wv_cATEx3wVsQ78y6-PNWYlrwLrWOhaP5Csj5OpdIGX4-gW3jXqWyj6_DnKEl8pbWz5DEnN7fERjwoejhR65rm7jSUuxR9_bwuUr0w",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"e\",\n    \"subtitle\": \"x\",\n    \"content\": \"a\",\n    \"isPublished\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8081/v1/articles",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"v1",
+						"articles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update an Article",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzkzMTkxMDgsImlhdCI6MTYzOTIzMjcwOCwic3ViIjoiMSIsImVtYWlsIjoiZXhhbXBsZWNhckBleGFtcGxlLmNvbSJ9.PM4Elmj16AjbIj_DPZqpgkM94ekbhzo1zDW_dg-2odDXwCPvX4gu9wCUvMDaGODlqW4CPC5H5z9EfQU13FX3Ib0v4uBFJTqowDWrqQ7ciXwU2Eir8ag5Td7nSNYRDdOanPsjjBtg9RhsqKkOiln9Bl8MI1rua3eLdI09eY1LUHKarn0UsqbJpOiy01ZaD7afQphOvmZezn21jVL82c657TpxRziDbqJSb4FaZaS7SCjuudC2wv_cATEx3wVsQ78y6-PNWYlrwLrWOhaP5Csj5OpdIGX4-gW3jXqWyj6_DnKEl8pbWz5DEnN7fERjwoejhR65rm7jSUuxR9_bwuUr0w",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"new\",\n    \"subtitle\": \"hello\",\n    \"content\": \"world\",\n    \"status\": \"PUBLISHED\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8081/v1/articles/4",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"v1",
+						"articles",
+						"4"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
